@@ -13,3 +13,120 @@ Terraform has created a lock file .terraform.lock.hcl to record the provider
 selections it made above. Include this file in your version control repository
 so that Terraform can guarantee to make the same selections by default when
 you run "terraform init" in the future.
+
+
+
+Created main.tf, but I am not familar with property manager, so I am not sure where these contract IDs come from.
+
+{25-09-24 21:39}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% terraform validate
+Success! The configuration is valid.
+
+{25-09-24 21:39}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% terraform apply
+data.akamai_properties.my_properties: Reading...
+data.akamai_group.my_group_id: Reading...
+data.akamai_appsec_configuration.my-configurations: Reading...
+data.akamai_appsec_configuration.my-configurations: Read complete after 4s [id=58847]
+
+Changes to Outputs:
+  + configuration-list = <<-EOT
+        +-----------------------------------------------------------------------------------------------------------------------------------+
+        | Configurations                                                                                                                    |
+        +-----------+-------------------------------------------+----------------+---------------------------+------------------------------+
+        | CONFIG_ID | NAME                                      | LATEST_VERSION | VERSION_ACTIVE_IN_STAGING | VERSION_ACTIVE_IN_PRODUCTION |
+        +-----------+-------------------------------------------+----------------+---------------------------+------------------------------+
+        | 58847     | 556                                       | 39             | 38                        | 0                            |
+        | 39624     | 8989                                      | 12             | 0                         | 0                            |
+        | 106000    | AAPHValidation                            | 11             | 10                        | 10                           |
+        | 66856     | AHSecTest                                 | 1              | 0                         | 0                            |
+        | 55932     | AMTest                                    | 2              | 0                         | 0                            |
+        | 26526     | ANkur test                                | 32             | 0                         | 0                            |
+        | 80535     | AP-bfernand                               | 1              | 0                         | 0                            |
+        | 83308     | Adi test                                  | 3              | 0                         | 0                            |
+        | 51653     | Adrian_BMS_Test                           | 2              | 0                         | 0                            |
+        | 32575     | Akamai Labs                               | 4              | 0                         | 0                            |
+        | 49710     | Akamai Uni                                | 1              | 0                         | 0                            |
+        | 97727     | Alex Test                                 | 1              | 0                         | 0                            |
+        | 25986     | Amrit_Waf                                 | 32             | 0                         | 0                            |
+        | 70815     | AmyTest                                   | 2              | 0                         | 0                            |
+        | 70816     | AmyTest2                                  | 1              | 0                         | 0                            |
+        | 104554    | Baker sec config test2                    | 1              | 0                         |                        |
+        +-----------+-------------------------------------------+----------------+---------------------------+------------------------------+
+    EOT
+
+You can apply this plan to save these new output values to the Terraform state, without changing any real infrastructure.
+╷
+│ Error: looking up group with name: My group name: group does not belong to contract: ctr_C-0N7RAC7
+│ 
+│   with data.akamai_group.my_group_id,
+│   on main.tf line 1, in data "akamai_group" "my_group_id":
+│    1: data "akamai_group" "my_group_id" {
+│ 
+╵
+╷
+│ Error: error listing properties: fetching properties: API error: 
+│ {
+│       "type": "https://problems.luna.akamaiapis.net/papi/v0/http/forbidden",
+│       "title": "Forbidden",
+│       "detail": "The authorization token you provided does not allow access to this resource. Please try another.",
+│       "instance": "https://akab-dtzl3pkhe4bqerey-oqutquw6u53hi6ct.luna.akamaiapis.net/papi/v1/properties?contractId=ctr_C-0N7RAC7\u0026groupId=grp_12345#8daa3a214cec12e2",
+│       "statusCode": 403
+│ }
+│ 
+│   with data.akamai_properties.my_properties,
+│   on main.tf line 12, in data "akamai_properties" "my_properties":
+│   12: data "akamai_properties" "my_properties" {
+
+
+
+    I tried to use a config name that was returned, but it doesn't like that:
+
+    Copyright (C) Akamai Technologies, Inc
+{25-09-24 21:45}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% akamai terraform --edgerc ~/.edgerc --section default export-appsec {"Test123"}
+Usage:
+  akamai [global flags] command [command flags] [arguments...]
+
+Commands:
+  config
+  install (alias: get)
+  list
+  search
+  uninstall
+  update
+  upgrade
+  help
+
+Global Flags:
+  --edgerc value, -e value                 Location of the credentials file [$AKAMAI_EDGERC]
+  --section value, -s value                Section of the credentials file [$AKAMAI_EDGERC_SECTION]
+  --accountkey value, --account-key value  Account switch key [$AKAMAI_EDGERC_ACCOUNT_KEY]
+  --help                                   show help (default: false)
+  --bash                                   Output bash auto-complete (default: false)
+  --zsh                                    Output zsh auto-complete (default: false)
+  --proxy value                            Set a proxy to use
+  --version                                Output CLI version (default: false)
+
+Copyright (C) Akamai Technologies, Inc
+
+
+
+Tried this, just in case:
+
+{25-09-24 21:47}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% terraform --edgerc ~/.edgerc --section default export-appsec {"Test123"}
+Terraform has no command named "/Users/abenage/.edgerc".
+
+To see all of Terraform's top-level commands, run:
+  terraform -help
+
+{25-09-24 21:47}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% 
+
+
+
+
+
+Used akamai AI and can access akamai CLI 
+
+{25-09-24 22:01}den-mpbqz:~/src/terraform-training@main✗✗✗✗✗✗ abenage% akamai appsec export --config 55932 --edgerc ~/.edgerc --section default
+Running appsec command... [========= ]{"configId":55932,"configName":"AMTest","version":2,"basedOn":1,"staging":{"status":"Inactive"},"production":{"status":"In
+
+
+
